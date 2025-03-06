@@ -34,6 +34,22 @@ $result = $conn->query($query);
     <!-- Sử dụng Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $(".note-input").on("change", function() {
+        var taskId = $(this).data("id");
+        var newNote = $(this).val();
+        
+        $.post("update_note.php", { id: taskId, note: newNote }, function(response) {
+            alert(response); // Hiển thị thông báo ghi chú đã lưu
+        });
+    });
+});
+</script>
+
+
 <body class="bg-light">
     <div class="container mt-5">
         <h2 class="text-center text-primary">📌 Danh sách công việc</h2>
@@ -62,34 +78,39 @@ $result = $conn->query($query);
 
         <!-- Hiển thị danh sách công việc -->
         <div class="card shadow-sm">
-            <table class="table table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th scope="col">Công việc</th>
-                        <th scope="col">Hạn chót</th>
-                        <th scope="col">Trạng thái</th>
-                        <th scope="col" class="text-center">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($row = $result->fetch_assoc()) : ?>
-                        <tr>
-                            <td><?= htmlspecialchars($row["task"]) ?></td>
-                            <td><?= $row["deadline"] ?: "Không có" ?></td>
-                            <td>
-                                <?= $row["status"] ? "<span class='badge bg-success'>Hoàn thành</span>" : "<span class='badge bg-warning text-dark'>Chưa xong</span>" ?>
-                            </td>
-                            <td class="text-center">
-                                <?php if (!$row["status"]) : ?>
-                                    <a class="btn btn-sm btn-success" href="done.php?id=<?= $row["id"] ?>">✔ Hoàn thành</a>
-                                <?php endif; ?>
-                                <a class="btn btn-sm btn-primary" href="edit.php?id=<?= $row["id"] ?>">✏ Chỉnh sửa</a>
-                                <a class="btn btn-sm btn-danger" href="delete.php?id=<?= $row["id"] ?>" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">❌ Xóa</a>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
+        <table class="table table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Công việc</th>
+            <th scope="col">Hạn chót</th>
+            <th scope="col">Trạng thái</th>
+            <th scope="col">Ghi chú</th>
+            <th scope="col" class="text-center">Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php while ($row = $result->fetch_assoc()) : ?>
+            <tr>
+                <td><?= htmlspecialchars($row["task"]) ?></td>
+                <td><?= $row["deadline"] ?: "Không có" ?></td>
+                <td>
+                    <?= $row["status"] ? "<span class='badge bg-success'>Hoàn thành</span>" : "<span class='badge bg-warning text-dark'>Chưa xong</span>" ?>
+                </td>
+                <td>
+                    <input type="text" class="form-control note-input" data-id="<?= $row["id"] ?>" value="<?= htmlspecialchars($row["notes"] ?? '') ?>">
+                </td>
+                <td class="text-center">
+                    <?php if (!$row["status"]) : ?>
+                        <a class="btn btn-sm btn-success" href="done.php?id=<?= $row["id"] ?>">✔ Hoàn thành</a>
+                    <?php endif; ?>
+                    <a class="btn btn-sm btn-primary" href="edit.php?id=<?= $row["id"] ?>">✏ Chỉnh sửa</a>
+                    <a class="btn btn-sm btn-danger" href="delete.php?id=<?= $row["id"] ?>" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">❌ Xóa</a>
+                </td>
+            </tr>
+        <?php endwhile; ?>
+    </tbody>
+</table>
+
         </div>
     </div>
 
